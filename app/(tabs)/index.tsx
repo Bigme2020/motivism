@@ -1,70 +1,68 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useMemo } from "react";
+import { ScrollView, Text, Button, Pressable, View } from "react-native";
+import { getDocumentAsync } from "expo-document-picker";
+import { Link } from "expo-router";
+import { Audio } from "expo-av";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { EMOTION, EMOTION_NAME } from "@/constants/emotion";
 
-export default function HomeScreen() {
+export default function Home() {
+  const emotions = useMemo(
+    () =>
+      Object.values(EMOTION).map((emotion) => ({
+        label: EMOTION_NAME[emotion].normal,
+        emotion,
+      })),
+    []
+  );
+
+  const onPress = async () => {
+    const { assets, canceled } = await getDocumentAsync();
+
+    if (!canceled) {
+      const { mimeType, uri } = assets[0];
+      if (mimeType && mimeType.split("/")[0] === "audio") {
+        const { sound } = await Audio.Sound.createAsync({ uri });
+        try {
+          const { isLoaded } = await sound.playAsync();
+          if (isLoaded) {
+            console.log("loaded!!!");
+          }
+        } catch (error) {
+          console.log(String(error));
+        }
+      }
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View className="w-full h-full flex flex-col items-center bg-[#fffceb]">
+      <Text className="mt-24 text-4xl">Emotivism</Text>
+      <View className="w-full flex-1 flex flex-row justify-end items-center p-9">
+        <View className="flex flex-col">
+          <Button onPress={onPress} title="Record" />
+          <Button onPress={onPress} title="Record" />
+        </View>
+        <View className="flex flex-col">
+          <Button onPress={onPress} title="Record" />
+          <Button onPress={onPress} title="Record" />
+          <Button onPress={onPress} title="Record" />
+          <Button onPress={onPress} title="Record" />
+          <Button onPress={onPress} title="Record" />
+        </View>
+      </View>
+      {/* {emotions.map(({ label, emotion }, index) => (
+        <Link
+          className="relative w-full h-[200] rounded-s-sm mb-2 bg-slate-500 rounded-lg"
+          href={`/emotion/${emotion}`}
+          key={index}
+          asChild
+        >
+          <Pressable>
+            <Text className="absolute left-1 bottom-1 text-white">{label}</Text>
+          </Pressable>
+        </Link>
+      ))} */}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
